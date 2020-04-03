@@ -3,3 +3,6 @@
 - Participants need to submit the solution every day before the end of the day.
 - Because of the COVID-19, lots of people stay at home, so it's a great time for practicing Data Structure and Algorithms.
 
+- Day1. Single Number
+- Day2. Happy Number
+- Day3. Maximum Subarray
