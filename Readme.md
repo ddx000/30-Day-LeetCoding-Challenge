@@ -304,7 +304,7 @@ class Solution:
 ```
 
 
-# Day 15[Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/)
+# Day 15 [Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/)
 - 基本上這題如果用除法 就超快，但是題目限定不能用除法，也要O(n)+ no extra space
 - 這題五個月前寫過一次，這次竟然再看到也想不出來... 真有魔性XD
 - A*B*C*D = DOT 基本上這種題目 就是要拆成兩個array，A,BCD 這樣然後兩次迴圈 一次從左到右 一次從右到左
@@ -333,5 +333,70 @@ class Solution:
         
         return res
 
+
+```
+
+
+# Day 16 [Valid Parenthesis String](https://leetcode.com/problems/valid-parenthesis-string/)
+思路1: 字串題+parentness--> stack  
+此題關鍵是*可以當作三種符號 如果枚舉的話就是樹狀結構，就是都做一次就是DFS 不知道會不會超時
+以下為代碼，後來跑測試案例到52/58時，真的TLE了
+
+```python
+class Solution:
+    def checkValidString(self, s: str) -> bool:
+        return self.dfs([],s)
+    
+    def dfs(self,stack,s):
+        #end condition    
+        if  len(s) == 0:
+            if len(stack) == 0:
+                return True
+            else:
+                return False
+        if s[0] == '(':
+            return self.dfs(stack+[s[0]], s[1:])    
+            
+        elif s[0] == ')':
+            if stack:
+                return self.dfs(stack[:-1], s[1:])
+            else:
+                return False
+            
+        else:
+            return self.dfs(stack[:-1], s[1:]) or self.dfs(stack+[s[0]] , s[1:]) or self.dfs(stack, s[1:])
+```
+
+腦袋中暫時沒其他解法，只好去討論區看看別人的思路  
+另外一個解法是 從頭到尾 用兩個變數存count min 和count max 意思就是到尾巴時 還需要幾個右括號  
+count min就是紀錄最少需求 我們把星號都當成右括號 ")"   
+count max就是紀錄最多需求 我們把都當成左括號 "("  
+一個迴圈  
+cmin ++ if "(" else --, if cmin<0, set it to 0  
+cmax ++ if "(" or "*" else --, cmax must>0 otherwise return false  
+
+```python
+class Solution:
+    def checkValidString(self, s: str) -> bool:
+        cmin = 0
+        cmax = 0
+        for i in s: 
+            if i =="(":
+                cmin += 1
+                cmax += 1
+                
+            elif i == "*":
+                cmin -= 1
+                cmax += 1    
+                
+            elif i == ")":
+                cmin -=1
+                cmax -=1
+                
+            if cmax<0:
+                return False
+            if cmin<0:
+                cmin = 0
+        return True if cmin==0 else False
 
 ```
