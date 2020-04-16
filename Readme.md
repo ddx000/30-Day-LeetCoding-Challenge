@@ -302,3 +302,36 @@ class Solution:
             s = s[move:]+s[:move]
         return s
 ```
+
+
+# Day 15[Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/)
+- 基本上這題如果用除法 就超快，但是題目限定不能用除法，也要O(n)+ no extra space
+- 這題五個月前寫過一次，這次竟然再看到也想不出來... 真有魔性XD
+- A*B*C*D = DOT 基本上這種題目 就是要拆成兩個array，A,BCD 這樣然後兩次迴圈 一次從左到右 一次從右到左
+
+
+```python
+class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        
+        dot = 1
+        res = [dot]
+        
+        # first loop O(n): left to right
+        for idx in range(len(nums)-1):
+            dot = dot * nums[idx]
+            res.append(dot)
+
+        # second loop O(n): r to l
+        dot = 1
+        for idx in range(len(nums)-1,0,-1):
+            dot = dot * nums[idx]
+            res[idx-1] = res[idx-1]*dot
+        
+        #Time O(n)
+        #Space O(1)
+        
+        return res
+
+
+```
