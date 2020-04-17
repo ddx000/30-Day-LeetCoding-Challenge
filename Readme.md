@@ -400,3 +400,54 @@ class Solution:
         return True if cmin==0 else False
 
 ```
+
+
+# Day 17 [Numbers of Islands](https://leetcode.com/problems/number-of-islands/)
+
+剛好上個月才寫過這題，這次二刷一次就AC 感覺思路清晰了許多]
+- 思路：題目說詢問島嶼數量，基本這種左右走的就是DFS沒錯，所以就兩個迴圈mn,iterate all elements in matrix, 遇到1就去DFS(此時CNT+1), 注意凡走過必留下痕跡，務必把1設為其他數字(有點像是走過就翻面的感覺)，不然會無窮迴圈
+- 提醒: 矩陣題型 Corner case(超出邊界) 很重要, 一些變數如果是dfs和main function 共用的話，就要self.classvariable
+- 技巧1: 走過就翻面(同448. Find All Numbers Disappeared in an Array) 可以另開一個記憶體arr 但是這樣浪費空間 就直接inplace改
+- 技巧2: 迴圈dfs，通常這種都是暴力解的安全牌，同437. Path Sum III，要優化時間複雜度就只能用用看dp可以記住什麼不要重複計算的東西
+
+```python
+class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+      
+        self.cnt = 0
+        self.grid = grid
+        
+        self.m = len(grid)
+        if self.m==0:
+            return 0
+        self.n = len(grid[0])
+        
+        
+        for i in range(self.m):
+            for j in range(self.n):
+                if self.grid[i][j]=='1': # ==1
+                    self.cnt += 1
+                    self.dfs(i,j)
+                    
+        return self.cnt
+        
+        
+    def dfs(self,i,j):
+        
+        if self.grid[i][j] != '1':
+            return 
+            
+        self.grid[i][j] = '-1'
+        if i+1 <= self.m-1:
+            self.dfs(i+1,j)
+        if i-1 >= 0:
+            self.dfs(i-1,j)
+        if j+1 <= self.n-1:
+            self.dfs(i,j+1)
+        if j-1 >= 0:
+            self.dfs(i,j-1)
+        
+        
+        return self.cnt
+```
+    
