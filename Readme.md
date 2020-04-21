@@ -450,4 +450,115 @@ class Solution:
         
         return self.cnt
 ```
-    
+
+
+# Day 18 [Minimum Path Sum](https://leetcode.com/problems/minimum-path-sum/)
+
+DP的題目，注意矩陣題都要小心corner case
+基本上把邊界先跑過一遍比較安全(就不用太多邊界處理)
+不用另外開矩陣，inplace改可以省空間
+
+
+```python=
+
+def minPathSum(grid):
+    m = len(grid)
+    if m == 0:
+        return 0
+    n = len(grid[0])
+
+    for i in range(1,m):
+        grid[i][0] = grid[i-1][0] + grid[i][0]
+    for j in range(1,n):
+        grid[0][j] = grid[0][j-1] + grid[0][j]
+
+    for i in range(1,m):
+        for j in range(1,n):
+            grid[i][j] = min(grid[i-1][j],grid[i][j-1])+grid[i][j] 
+            
+    return grid[-1][-1]
+
+
+```
+
+# Day19 Search in Rotated Sorted Array
+
+基本上這題一開始的觀念很Triky, 要懂得用中位數和尾巴去判斷前後哪段是有序，因為題目只有一個PIVOT點，所以一定會有一段是有序的，有序的話，馬上就能判斷target是不是在裡面，基本上就是二分查找  
+另外一個要注意的點就是，while left<=left這邊要記得加等於，可以參考下面這篇   -->[你真的会二分查找吗](https://blog.csdn.net/int64ago/article/details/7425727/)
+- 1. while >=
+- 2. left= mid+1, right=mid-1
+- 3. mid可以>target或者>=, 大於等於就是YES LEFT
+
+
+
+```python=
+class Solution:
+    def search(self, lst: List[int], target: int) -> int:
+
+        if lst == None:
+            return -1
+        left = 0
+        right = len(lst) -1
+        while left<=right:
+            mid = (left+right)//2
+            if target == lst[mid]:
+                return mid
+            #右半邊有序
+            if lst[mid] < lst[right]:
+                if lst[mid]<target<=lst[right]:
+                    #刪左邊，留右邊
+                    left = mid +1 
+                else:
+                    #刪右邊，留左邊
+                    right = mid - 1
+
+            #左半邊有序
+            else:
+                if lst[left]<=target<lst[mid]:
+                    #刪右邊，留左邊
+                    right = mid - 1
+                else:
+                    #刪左邊，留右邊
+                    left = mid +1 
+        return -1
+```
+
+
+# Day 20
+
+Tree題基本上都要一個helper
+二元樹就是self.left= helper(...)這樣
+
+開頭寫終止條件return None
+最後寫return node把答案回傳回去
+
+題目都在同一個list上作創作，所以基本上不用額外copy記憶體，用idx傳下去
+
+基本二分條件就是看大小，這邊用個迴圈就能決定怎麼拆(因為題目進來是preorder)
+
+
+
+```python
+
+class Solution:
+    def bstFromPreorder(self, preorder):
+        def helper(start,end):
+            if start == end:
+                return None
+            idx = start
+            while idx < end:
+                if preorder[idx]>preorder[start]:
+                    print(preorder[idx],idx)
+                    break
+                idx+=1
+
+            node = TreeNode(preorder[start])
+            node.left = helper(start+1,idx)
+            node.right = helper(idx,end)
+
+            return node
+
+        return helper(0,len(preorder))
+
+
+```
