@@ -89,7 +89,7 @@ class Solution:
                 idx+=1
 ```
 
-# Day5  [Best Time to Buy and Sell Stock II](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/)
+# Day 5  [Best Time to Buy and Sell Stock II](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/)
 - 這題是這系列題裡面最簡單的一題，基本上其他系列都要用DP
 - 取一階微分後把正數加起來就好
 
@@ -481,7 +481,7 @@ def minPathSum(grid):
 
 ```
 
-# Day19 Search in Rotated Sorted Array
+# Day 19 Search in Rotated Sorted Array
 
 基本上這題一開始的觀念很Triky, 要懂得用中位數和尾巴去判斷前後哪段是有序，因為題目只有一個PIVOT點，所以一定會有一段是有序的，有序的話，馬上就能判斷target是不是在裡面，基本上就是二分查找  
 另外一個要注意的點就是，while left<=left這邊要記得加等於，可以參考下面這篇   -->[你真的会二分查找吗](https://blog.csdn.net/int64ago/article/details/7425727/)
@@ -524,7 +524,8 @@ class Solution:
 ```
 
 
-# Day 20
+# Day 20 Build a Binary Search Tree from a Preorder Sequence
+
 
 Tree題基本上都要一個helper
 二元樹就是self.left= helper(...)這樣
@@ -561,4 +562,119 @@ class Solution:
         return helper(0,len(preorder))
 
 
+```
+
+# Day 21 Leftmost Column with at Least a One
+
+這題是互動題，有點像打靶，但是打靶次數有限制，矩陣題比較混淆的是題目給的x是對應到矩陣的m(所以不是一般肉眼見到的XD)  
+基本上一定是二分法啦，題目的矩陣同一row是先0後1，所以一定一開始是打一整column的值，全0代表找太左邊了，有一個1的話，代表還是要往左邊找，這樣不斷縮小邊界，當然這時候就不用一次打一整列col了，因為你過去打到0的地方，你往左打，肯定也是0  
+(所以這邊用一個newrow去存他)  
+大概就是二分左右逼近就搞定了(記得 打到1就把那一COL號碼存起來，最後一定會打到最近的)
+
+```python
+
+class Solution:
+    def leftMostColumnWithOne(self, binaryMatrix: 'BinaryMatrix') -> int:
+        row , col = binaryMatrix.dimensions()[0] , binaryMatrix.dimensions()[1]
+        self.rows = list(range(row))
+        left,right = 0,col-1
+        # print(row,col)
+        self.res = -1
+        
+        while left<=right:
+            mid = (left+right)//2
+            #print(mid,'mid')
+            lst = []
+            newrow =[]
+            for y in self.rows:
+                # print(y,mid)
+                val = binaryMatrix.get(y,mid)
+                lst.append(val)
+                if val ==1:
+                    newrow.append(y)
+            
+            # print(lst,'lst')
+            if lst == [0]*row: #全零 就是代表找太前面了
+                left = mid + 1
+            else: #有一個1 !!
+                # print('find1')
+                self.rows = newrow
+                self.res = mid
+                right = mid -1
+            # print(left,right)
+        return self.res
+```
+
+# Day 22 Subarray Sum Equals K
+
+這題真的血淚，因為兩周前做過，結果這次再寫第二遍
+**我還是想不出來HASHMAP的做法 真的太奇葩了**
+
+只能先用prefix sum 試試看 
+
+因為可以節省重複的計算
+然後記得prefix前面+[0]
+[1,1,2,1]
+prefix
+[0,1,2,4,5]
+sumi到j(含)總和sum[0:3] = prefix[j+1]-prefix[i]
+
+結果馬上TLE.........
+
+```python
+class Solution:
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        sums = 0
+        prefix = [0]
+        # n
+        for i in nums:
+            sums += i
+            prefix.append(sums)
+
+        res = 0
+
+        # n^2
+        for i in range(len(nums)):
+            for j in range(i,len(nums)):
+                if k == prefix[j+1] - prefix[i]:
+                    res+=1
+        return res
+```
+
+只好重新定義題目
+題目是問子數組的和為K
+大概像這樣
+[1,3,5,[SUM = 13 =K ],8,1,2]
+但是 這樣就是求
+1+3+5 == (21 - 13)
+         SUM - K
+       ^i         ^j
+
+sum(0,i) = sum(0,j) - k
+題目重新定義，有多少從頭開始得子數組 = 特定值呢
+
+這邊再用一個hashmap 紀錄有幾種可能
+k =和 v=可能 所以一開始一定有(0,1)
+
+開始走一遍:
+把rolling sum加進去dic裡面(初始值是(0,1))
+res += dic.get(sum-k,0)
+為什麼會去dic找sum-k的概念有點是這樣
+
+以同樣迴圈走到star處 開始往前找的時候，dictionary出現幾個sum-k就代表k有幾種可能
+(同一個尾巴star處 往前推伸)
+(sum-k.......)(  k)*
+(sum-k...)(      k)*
+
+```python
+class Solution:
+    def subarraySum(self, nums, k):
+        dic ={0:1} #形成0有一種可能
+        sums = 0
+        res = 0
+        for i in nums:
+            sums += i
+            res  += dic.get(sums-k,0)
+            dic[sums] = dic.get(sums,0)+1
+        return res
 ```
