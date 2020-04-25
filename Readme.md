@@ -483,7 +483,7 @@ def minPathSum(grid):
 
 # Day 19 Search in Rotated Sorted Array
 
-基本上這題一開始的觀念很Triky, 要懂得用中位數和尾巴去判斷前後哪段是有序，因為題目只有一個PIVOT點，所以一定會有一段是有序的，有序的話，馬上就能判斷target是不是在裡面，基本上就是二分查找  
+基本上這題一開始的觀念很tricky, 要懂得用中位數和尾巴去判斷前後哪段是有序，因為題目只有一個PIVOT點，所以一定會有一段是有序的，有序的話，馬上就能判斷target是不是在裡面，基本上就是二分查找  
 另外一個要注意的點就是，while left<=left這邊要記得加等於，可以參考下面這篇   -->[你真的会二分查找吗](https://blog.csdn.net/int64ago/article/details/7425727/)
 - 1. while >=
 - 2. left= mid+1, right=mid-1
@@ -605,7 +605,7 @@ class Solution:
         return self.res
 ```
 
-# Day 22 Subarray Sum Equals K
+# Day 22 [Subarray Sum Equals K](https://leetcode.com/problems/subarray-sum-equals-k/)
 
 這題真的血淚，因為兩周前做過，結果這次再寫第二遍
 **我還是想不出來HASHMAP的做法 真的太奇葩了**
@@ -641,7 +641,7 @@ class Solution:
         return res
 ```
 
-只好重新定義題目
+只好重新定義題目(舉例/相似/簡化/DP/列舉 這五種方法的"簡化法")
 題目是問子數組的和為K
 大概像這樣
 [1,3,5,[SUM = 13 =K ],8,1,2]
@@ -677,4 +677,123 @@ class Solution:
             res  += dic.get(sums-k,0)
             dic[sums] = dic.get(sums,0)+1
         return res
+```
+
+# Day 23 [Bitwise AND of Numbers Range](https://leetcode.com/problems/bitwise-and-of-numbers-range/)
+題目要找一定範圍的BITWISE AND，這時候用舉例法
+
+26: 11010
+29: 11101
+基本上只有前兩位一樣，後面只要有出現過0的話都是0，那我們把它>>3次 把他們變成11=11 這樣就是重疊的地方了
+
+```python
+class Solution:
+    def rangeBitwiseAnd(self, m: int, n: int) -> int:
+        cnt =0
+        while m!=n:
+            m = m>>1
+            n = n>>1
+            cnt+=1
+        return m<<cnt
+```
+
+# Day 24 [LRU Cache](https://leetcode.com/problems/lru-cache/)
+面試出現機率超高的LRU Cache... 又再遇到了  
+這次寫有個地方沒注意到，就是dict的key值一定不能讓他重複!!!  
+因為重複的話，dict會直接覆蓋過去，但是LRU結構卻會不斷增長  
+
+如何選取數據結構?  
+1.  
+題目要求的get功能+O(1)就要聯想到hashmap  
+2.  
+接下來就是put新資料後，要把最少用的資料刪除  
+常常刪除，就不可能用array，要用linked list  
+而linked list在時間複雜度上，雙向的可以達到任意NODE del都達到O(1)  
+由於insert 都是在頭部或尾部插入，所以時間複雜度也是O(1)  
+3.  
+結合haspmap+double linked list  
+可以在O(1) access到該個node，del的話也可以在O(1)的時間內  
+4.  
+簡單來說，就是用空間換取時間複雜度的概念，hashmap記錄了node在哪裡，node本身又存了key,value和pre, next等指標  
+```python
+
+class Node:
+    def __init__(self,k,v):
+        # double pointer
+        self.pre  = None
+        self.next = None
+        # key and value
+        self.k = k
+        self.v = v
+
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        print(capacity)
+        # HASHMAP for quickly access where is the node
+        #結構:key  :  value = node(k,v)
+        self.dic = {}           
+
+        # 一開始要初始化頭尾
+        self.head = Node(0,0)
+        self.tail = Node(0,0)
+        self.head.next = self.tail
+        self.tail.pre  = self.head
+
+    def get(self, key: int) -> int:
+        if key not in self.dic:
+            return -1
+        # 移除後，再加進去
+        self._remove(self.dic[key])
+        self._add(self.dic[key]) #加進尾巴
+        # hashmap存的是整個node，現在只要該node的value
+        return self.dic[key].v
+
+
+    def put(self, key: int, value: int) -> None:
+        # 務必要檢查重複的情況，因為重複的key在dictionary裡面會直接取代，
+        # 但是後面檢查長度時，是用dic的長度去檢查，就會出現重複的值塞進去，dic一直取代，但是長度不變
+        if key in self.dic:
+            self._remove(self.dic[key])
+        newnode = Node(key,value)
+        self._add(newnode)
+        self.dic[key] = newnode
+        if len(self.dic)>self.capacity:
+            # 最少使用的就在頭部刪除
+            # 字典裏面也要去掉
+            del self.dic[self.head.next.k]
+            self._remove(self.head.next)
+
+
+    def _add(self,node):
+        # 新進來，或剛使用的，就加進尾部
+        self.tail.pre.next = node
+        node.pre = self.tail.pre
+        self.tail.pre = node
+        node.next = self.tail
+
+    def _remove(self, remove_node):
+        # 把指標改掉後，剩下的給GC回收
+        remove_node.pre.next = remove_node.next
+        remove_node.next.pre = remove_node.pre
+```
+
+# Day 25 [Jump game](https://leetcode.com/problems/jump-game/)
+
+
+```python
+class Solution(object):
+    def canJump(self, nums):
+        """
+        這題是Greedy算法
+        我只要算我能走的最遠的地方，是不是能到終點就好
+        """
+        maxarrived = 0
+        for idx, i in enumerate(nums):
+            if idx <= maxarrived:
+                maxarrived = max(idx+i,maxarrived)
+            
+        return True if maxarrived>= len(nums)-1 else False
+            
 ```
