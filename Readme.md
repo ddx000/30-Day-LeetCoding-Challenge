@@ -797,3 +797,134 @@ class Solution(object):
         return True if maxarrived>= len(nums)-1 else False
             
 ```
+
+# Day 26 Longest Common Subsequence
+
+本題hint幫了我大忙  
+Try dynamic programming. DP[i][j] represents the longest common subsequence of text1[0 ... i] & text2[0 ... j].  
+轉移方程要注意
+錯誤寫法-->(因為這樣會有一個字符重複的問題)  
+這題之後會補上圖解  
+                # add = 1 if text1[i] == text2[j] else 0   
+                # dp[i][j] = max(dp[i][j-1],dp[i-1][j],dp[i-1][j-1]) + add   
+
+```python
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        
+        
+        I = len(text1)
+        J = len(text2)
+        #dp = [[0]*J]*I 錯誤寫法!!!
+        dp = [[0 for _ in range(J+1)] for _ in range(I+1)]
+        #這邊要多開一個陣列，就不要填，避免邊界問題
+            
+        for i in range(1,I+1):
+            for j in range(1,J+1):
+
+                if text1[i-1] == text2[j-1]:
+                    dp[i][j] = dp[i-1][j-1] +1
+                    
+                else:
+                    dp[i][j] = max(dp[i][j-1],dp[i-1][j]) #絕對不可以偷懶用-1法
+
+        return dp[-1][-1]
+```
+
+
+
+# Day 27 Maximal Square
+
+DP題，很不好想到
+額外開一個dp陣列，儲存以該點位為右下角，往左上延伸時，可以獲得的最大值  
+if matrix[m][n]==1: dp[m][n] = min(dp[m-1][n],dp[m][n-1],dp[m-1][n-1])+1  
+這個轉移方程畫個圖才有辦法了解...
+
+![](https://i.imgur.com/c0pGrK3.png)
+注意corner case 所以在創dp時 會多開一個欄位(這樣左上角才不會超出邊界)  
+
+```python
+class Solution:
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+
+        m = len(matrix)
+        if m==0:
+            return 0
+        n = len(matrix[0])
+        dp = [[0 for _ in range(n+1)] for _ in range(m+1)]
+
+        maxvalue = 0
+        # dp有多開一個欄位
+        for i in range(m):
+            for j in range(n):
+                if matrix[i][j]== "1":
+                    dp[i+1][j+1] = min(dp[i][j+1],dp[i+1][j],dp[i][j]) + 1
+                    maxvalue = max(dp[i+1][j+1],maxvalue)
+        return maxvalue**2
+```
+
+# Day 28 FirstUnique
+
+
+- TLE的解法，add 是O(1)，search是O(n)
+```python
+class FirstUnique:
+
+    def __init__(self, nums: List[int]):
+        self.lst = nums
+        self.dic = {}
+        for i in self.lst:
+            self.dic[i] = self.dic.get(i,0)+1
+
+    def showFirstUnique(self) -> int:
+        # O(n)
+        for i in self.lst:
+            if self.dic[i] == 1:
+                return i
+        return -1
+
+
+    def add(self, value: int) -> None:
+        # O(1)
+        self.lst.append(value)
+        self.dic[value] = self.dic.get(value,0) + 1
+```
+由於上面這解法TLE，出問題的應該是showFirstUnique這個複雜度必須降到log(n)  
+這題有點像是LRU Cache，可以試試看double linked list(為何選擇-->移除新增快)+ hashmap(直接跳選到該node)  
+基本上我就是要insert進來後，我可以在O(1)的時間內刪掉重複的node，永遠return linked list的head就可以  
+不過這邊練習一下python特有的ordered dict來試試看  
+
+- initial花了最久的時間... 要處理一些重複的問題
+- add時間複雜度O(1) show基本上也是O(1) (如果我沒計算錯的話XD)
+- 記憶體開銷是比較大了點，會維護兩個hashmap(一個orderdict for 順序，另一個是set，處理一些一開始出現的情況)
+
+```python
+
+class FirstUnique:
+
+    from collections import OrderedDict, Counter
+
+    def __init__(self, nums: List[int]):
+        temp_dic = OrderedDict(Counter(nums))
+        self.dic = OrderedDict()
+        self.set = set(nums)
+        for k, v in temp_dic.items():
+            if v == 1:
+                self.dic[k] = v
+
+    def showFirstUnique(self) -> int:
+        if self.dic:
+            #return list(self.dic)[0]
+            return next(iter(self.dic.keys())) 
+        else:
+            return -1
+
+    def add(self, value: int) -> None:
+        if value in self.dic:
+            del self.dic[value]
+        elif value in self.set:
+            pass
+        else:
+            self.dic[value] = 1
+
+```
